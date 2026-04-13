@@ -2,104 +2,90 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Journée Portes Ouvertes</title>
+<title>JPO - Réservation</title>
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #fafafa;
-        padding: 20px;
-        max-width: 760px;
-        margin: auto;
-    }
+body { 
+    font-family: Arial; 
+    background:#fafafa; 
+    max-width:760px; 
+    margin:auto; 
+    padding:20px; 
+}
+h1 { font-size:26px; font-weight:800; margin-bottom:0; }
+h2 { font-size:16px; margin-top:4px; }
 
-    h1 {
-        font-size: 28px;
-        font-weight: 800;
-        margin-bottom: 0;
-        color: #111;
-    }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:14px;
+  margin-top:20px;
+}
 
-    h2 {
-        font-size: 16px;
-        font-weight: 600;
-        margin-top: 4px;
-    }
+.slotBtn {
+  background:white;
+  border:2px solid #ddd;
+  border-radius:12px;
+  padding:14px 0;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.2s;
+}
 
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 14px;
-        margin-top: 20px;
-    }
+.slotBtn:hover { border-color:#c14b42; color:#c14b42; }
 
-    .slotBtn {
-        background: white;
-        border: 2px solid #ddd;
-        border-radius: 12px;
-        padding: 14px 0;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.2s;
-        width: 100%;
-    }
+.full {
+  background:#eee !important;
+  color:#aaa !important;
+  border-color:#ccc !important;
+  cursor:not-allowed !important;
+}
 
-    .slotBtn:hover { border-color: #c14b42; color: #c14b42; }
+.active {
+  background:#c14b42 !important;
+  border-color:#c14b42 !important;
+  color:white !important;
+}
 
-    .full {
-        background: #eee !important;
-        color: #aaa !important;
-        border-color: #ccc !important;
-        cursor: not-allowed !important;
-    }
-
-    .active {
-        background: #c14b42 !important;
-        color: white !important;
-        border-color: #c14b42 !important;
-    }
-
-    #overlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 999;
-    }
-
-    #popup {
-        display:none;
-        position: fixed;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        background: #c14b42;
-        padding: 26px;
-        border-radius: 18px;
-        max-width: 420px;
-        width: 90%;
-        color: #fff;
-        z-index: 1000;
-    }
-
-    input, button {
-        width: 100%;
-        padding: 12px;
-        border-radius: 10px;
-        border: none;
-        margin-bottom: 10px;
-    }
-
-    button.submit {
-        background: white;
-        color: #c14b42;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
+/* POPUP */
+#overlay {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:999;
+}
+#popup {
+  display:none;
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%, -50%);
+  background:#c14b42;
+  padding:26px;
+  border-radius:18px;
+  max-width:420px;
+  width:90%;
+  color:white;
+  z-index:1000;
+}
+#popup input {
+  width:100%; padding:12px; border-radius:10px; border:none; margin-bottom:10px;
+}
+#popup button.submit {
+  background:white; 
+  color:#c14b42; 
+  padding:14px; 
+  border:none;
+  font-weight:800; 
+  border-radius:12px; 
+  width:100%; 
+  cursor:pointer;
+}
 </style>
-</head>
 
+</head>
 <body>
 
 <h1>Journée Portes Ouvertes</h1>
@@ -107,119 +93,108 @@
 
 <div class="grid" id="grid"></div>
 
-<div id="placesInfo"></div>
-
-<!-- ✅ SCRIPT DE SYNCHRONISATION -->
 <script>
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxL9HA3Kh3HjuMtOtv4yb2--bc_0QuEUvRqrg53V1-fdKBEko9wTC364PXy2D4TQPBH/exec";
+// ✅ URL de ton script Apps Script JPO
+const DATA_URL =
+  "https://script.google.com/macros/s/AKfycbxL9HA3Kh3HjuMtOtv4yb2--bc_0QuEUvRqrg53V1-fdKBEko9wTC364PXy2D4TQPBH/exec";
 
-// IDs + horaires
+// ✅ Créneaux disponibles
 const slots = [
-    {id:1, horaire:"09h00 – 09h45"},
-    {id:2, horaire:"09h45 – 10h30"},
-    {id:3, horaire:"10h30 – 11h15"},
-    {id:4, horaire:"11h15 – 12h00"},
-    {id:5, horaire:"12h30 – 13h15"},
-    {id:6, horaire:"13h15 – 14h00"},
-    {id:7, horaire:"14h00 – 14h45"},
-    {id:8, horaire:"14h45 – 15h30"},
-    {id:9, horaire:"15h30 – 16h15"},
-    {id:10, horaire:"16h15 – 17h00"},
+  {id:1,h:"09h00 – 09h45"},
+  {id:2,h:"09h45 – 10h30"},
+  {id:3,h:"10h30 – 11h15"},
+  {id:4,h:"11h15 – 12h00"},
+  {id:5,h:"12h30 – 13h15"},
+  {id:6,h:"13h15 – 14h00"},
+  {id:7,h:"14h00 – 14h45"},
+  {id:8,h:"14h45 – 15h30"},
+  {id:9,h:"15h30 – 16h15"},
+  {id:10,h:"16h15 – 17h00"},
 ];
 
-// Affichage HTML
+// ✅ Affichage
 const grid = document.getElementById("grid");
-slots.forEach(s => {
-    let btn = document.createElement("button");
-    btn.className = "slotBtn";
-    btn.innerHTML = s.horaire.split("–")[0];
-    btn.dataset.id = s.id;
-    btn.dataset.horaire = s.horaire;
-    grid.appendChild(btn);
+
+slots.forEach(s=>{
+  let b=document.createElement("button");
+  b.className="slotBtn";
+  b.textContent=s.h.split("–")[0].trim();
+  b.dataset.id=s.id;
+  b.dataset.horaire=s.h;
+  grid.appendChild(b);
 });
 
-// Charger les dispos
-fetch(WEBAPP_URL)
-    .then(r => r.text())
-    .then(html => {
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, "text/html");
-        let rows = [...doc.querySelectorAll("tr")];
+// ✅ Charger dispos depuis Apps Script
+fetch(DATA_URL)
+.then(r=>r.text())
+.then(html=>{
+  let doc = new DOMParser().parseFromString(html,"text/html");
+  doc.querySelectorAll("tr").forEach(row=>{
+    let id=row.children[0].innerText.trim();
+    let places=parseInt(row.children[2].innerText.trim());
+    let btn=document.querySelector(`[data-id="${id}"]`);
 
-        rows.forEach(row => {
-            let id = row.children[0].innerText;
-            let places = parseInt(row.children[2].innerText);
+    if(!btn) return;
 
-            let btn = document.querySelector(`[data-id="${id}"]`);
-            if (!btn) return;
+    if(places<=0){
+      btn.classList.add("full");
+      btn.disabled=true;
+      btn.textContent="COMPLET";
+    } else {
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll(".slotBtn").forEach(x=>x.classList.remove("active"));
+        btn.classList.add("active");
+        ouvrirPopup(id,btn.dataset.horaire);
+      });
+    }
+  });
+});
 
-            btn.dataset.places = places;
-
-            if (places <= 0) {
-                btn.classList.add("full");
-                btn.disabled = true;
-            }
-
-            btn.addEventListener("click", () => {
-                if (btn.classList.contains("full")) return;
-
-                document.querySelectorAll(".slotBtn")
-                    .forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-
-                ouvrirPopup(id, btn.dataset.horaire, places);
-            });
-        });
-    });
-
-// POP-UP
-function ouvrirPopup(id, horaire, places) {
-    document.getElementById("horaireTxt").innerHTML = horaire;
-    document.getElementById("creneau_id").value = id;
-    document.getElementById("overlay").style.display = "block";
-    document.getElementById("popup").style.display = "block";
+// ✅ POPUP
+function ouvrirPopup(id,horaire){
+  document.getElementById("horaire").textContent=horaire;
+  document.getElementById("idSlot").value=id;
+  document.getElementById("overlay").style.display="block";
+  document.getElementById("popup").style.display="block";
 }
 
-function fermerPopup() {
-    document.getElementById("overlay").style.display = "none";
-    document.getElementById("popup").style.display = "none";
+function fermerPopup(){
+  document.getElementById("overlay").style.display="none";
+  document.getElementById("popup").style.display="none";
 }
 
-// ENVOI FORMULAIRE
-function envoyer(e) {
-    e.preventDefault();
-    let form = new FormData(e.target);
-
-    fetch(WEBAPP_URL, { method:"POST", body:form })
-        .then(r => r.text())
-        .then(msg => {
-            alert("✅ Votre réservation est enregistrée !");
-            location.reload();
-        });
+// ✅ FORMULAIRE (POST vers Apps Script JPO)
+function envoyerForm(e){
+  e.preventDefault();
+  let fd=new FormData(e.target);
+  fetch(DATA_URL,{method:"POST",body:fd})
+  .then(r=>r.text())
+  .then(txt=>{
+    alert(txt.includes("✅")?"✅ Réservation confirmée !":"❌ Créneau complet");
+    location.reload();
+  });
 }
 </script>
 
-<!-- ✅ POP-UP -->
+<!-- ✅ POPUP -->
 <div id="overlay" onclick="fermerPopup()"></div>
-
 <div id="popup">
-    <div style="text-align:right">
-        <button onclick="fermerPopup()" style="background:none;color:white;font-size:24px;">×</button>
-    </div>
+  <div style="text-align:right;">
+    <button onclick="fermerPopup()" 
+      style="background:none;border:none;color:white;font-size:24px;">×</button>
+  </div>
 
-    <h3>Créneau sélectionné :</h3>
-    <p id="horaireTxt"></p>
+  <h3>Créneau sélectionné :</h3>
+  <p id="horaire"></p>
 
-    <form onsubmit="envoyer(event)">
-        <input type="text" name="nom" placeholder="Nom et prénom" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="tel" name="telephone" placeholder="Téléphone" required>
-        <input type="hidden" name="creneau_id" id="creneau_id">
-
-        <button class="submit">Confirmer ma réservation</button>
-    </form>
+  <form onsubmit="envoyerForm(event)">
+    <input type="text" name="nom" placeholder="Nom et prénom" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="tel" name="telephone" placeholder="Téléphone" required>
+    <input type="hidden" name="creneau_id" id="idSlot">
+    <button class="submit">Confirmer ma réservation</button>
+  </form>
 </div>
 
 </body>
 </html>
-``
